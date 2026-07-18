@@ -3,33 +3,174 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Translator</title>
+    <title>PDF Translator Pro</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </head>
   <body>
-    <div class="container">
-      <div id="dropZone" class="drop-zone">
-        <p>Drag and drop PDF here or click to select</p>
-        <input type="file" id="pdfInput" accept="application/pdf" />
+    <div class="app-wrapper">
+      <!-- TOP BAR -->
+      <header class="top-bar">
+        <div class="logo">
+          <span class="logo-icon">📄</span>
+          <span class="logo-text" data-i18n="appTitle">PDF Translator Pro</span>
+        </div>
+        <div class="top-bar-right">
+          <select
+            id="uiLangSelect"
+            class="ui-lang-select"
+            aria-label="Interface language"
+          >
+            <option value="en">🇬🇧 English</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="zh-CN">🇨🇳 中文 (简体)</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="hi">🇮🇳 हिन्दी</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="nl">🇳🇱 Nederlands</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+          </select>
+        </div>
+      </header>
+
+      <!-- MAIN CONTAINER -->
+      <div class="container">
+        <!-- DROP ZONE -->
+        <div id="dropZone" class="drop-zone">
+          <div class="drop-zone-inner">
+            <span class="drop-icon">📂</span>
+            <p class="drop-text" data-i18n="dropZoneText">
+              Drag and drop PDF here or click to select
+            </p>
+            <span class="drop-subtext" data-i18n="dropZoneSub"
+              >Supports .pdf files</span
+            >
+          </div>
+          <input type="file" id="pdfInput" accept="application/pdf" />
+        </div>
+        <div id="fileNameDisplay" class="file-name-display"></div>
+
+        <!-- CONTROLS -->
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="languageSelect" data-i18n="targetLangLabel"
+              >Translate to</label
+            >
+            <select id="languageSelect" class="target-lang-select"></select>
+          </div>
+          <button id="translateBtn" class="btn-primary translate-btn">
+            <span class="btn-text" data-i18n="translateBtn">Translate</span>
+            <span id="spinner" class="spinner" style="display: none"></span>
+          </button>
+        </div>
+
+        <!-- STATUS -->
+        <div id="statusMessage" class="status-message"></div>
+
+        <!-- OUTPUT TABS -->
+        <div id="outputContainer" style="display: none">
+          <div class="tabs">
+            <button
+              class="tab-btn active"
+              data-tab="translation"
+              data-i18n="tabTranslation"
+            >
+              📝 Translation
+            </button>
+            <button class="tab-btn" data-tab="summary" data-i18n="tabSummary">
+              📋 Summary
+            </button>
+            <button class="tab-btn" data-tab="audio" data-i18n="tabAudio">
+              🔊 Audio
+            </button>
+          </div>
+
+          <div class="tab-content active" id="tabTranslation">
+            <div class="tab-actions">
+              <button
+                id="downloadPdfBtn"
+                class="btn-secondary"
+                data-i18n="downloadBtn"
+              >
+                ⬇ Download PDF
+              </button>
+            </div>
+            <div id="textOutput" class="text-output"></div>
+          </div>
+
+          <div class="tab-content" id="tabSummary">
+            <div class="tab-actions">
+              <button
+                id="summarizeBtn"
+                class="btn-secondary"
+                data-i18n="summarizeBtn"
+              >
+                ✨ Generate Summary
+              </button>
+              <span class="summary-info" data-i18n="summaryInfo"
+                >(extractive summarization)</span
+              >
+            </div>
+            <div id="summaryOutput" class="text-output summary-output"></div>
+          </div>
+
+          <div class="tab-content" id="tabAudio">
+            <div class="tab-actions audio-controls">
+              <button
+                id="readAloudBtn"
+                class="btn-secondary"
+                data-i18n="readBtn"
+              >
+                🔊 Read Aloud
+              </button>
+              <button
+                id="stopReadingBtn"
+                class="btn-secondary danger"
+                data-i18n="stopBtn"
+              >
+                ⏹ Stop
+              </button>
+              <div class="voice-select-wrapper">
+                <label for="voiceSelect" data-i18n="voiceLabel">Voice:</label>
+                <select id="voiceSelect"></select>
+              </div>
+              <div class="speed-control">
+                <label for="speedRange" data-i18n="speedLabel">Speed:</label>
+                <input
+                  type="range"
+                  id="speedRange"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value="1"
+                />
+                <span id="speedValue">1.0x</span>
+              </div>
+            </div>
+            <div id="audioStatus" class="audio-status"></div>
+            <div
+              id="audioTextDisplay"
+              class="text-output audio-text-display"
+            ></div>
+          </div>
+        </div>
       </div>
-      <div id="fileNameDisplay"></div>
-      <select id="languageSelect">
-        <option value="">Select target language</option>
-      </select>
-      <button id="translateBtn" class="translate-btn">
-        <span class="btn-text">Translate</span>
-        <span id="spinner" class="spinner" style="display: none"></span>
-      </button>
-      <div id="statusMessage"></div>
-      <div id="outputContainer" style="display: none">
-        <button id="downloadPdfBtn" type="button" class="translate-btn">
-          Download PDF
-        </button>
-        <div id="textOutput"></div>
-      </div>
+
+      <!-- FOOTER -->
+      <footer class="app-footer">
+        <span data-i18n="footerText"
+          >PDF Translator Pro &bull; Free &amp; Private</span
+        >
+      </footer>
     </div>
+
     <script src="script.js"></script>
   </body>
 </html>
