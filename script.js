@@ -332,7 +332,7 @@ async function translateText(text, targetLang) {
         if (sentence[0]) translatedFull += sentence[0];
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
     } catch (error) {
       translatedFull += "\n[Translation Error in this block]\n";
     }
